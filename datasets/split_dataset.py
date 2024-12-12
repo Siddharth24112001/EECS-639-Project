@@ -1,7 +1,7 @@
 import os
 import csv
 
-from typing import Iterable, Union, Dict, List
+from typing import Optional, Iterable, Union, Dict, List
 
 """
 Splits the user_behavior_dataset by device model into smaller datasets
@@ -10,10 +10,13 @@ DATA_SET_NAME = "user_behavior_dataset.csv"
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))
 ROW = Dict[str, Union[str, int]]
 
+OUTPUT_COL = 'Battery Drain (mAh/day)'
+INPUT_ROWS = ["App Usage Time (min/day)", "Screen On Time (hours/day)"]
 
-def try_parse_int(value: str) -> Union[str, int]:
+
+def try_parse_float(value: str) -> Union[str, float]:
     try:
-        return int(value)
+        return float(value)
     except ValueError:
         return value
 
@@ -23,14 +26,30 @@ class SplitDataSet:
         self.name = name
         self.columns = columns
         self.rows: List[ROW] = []
+        self.highest_out = -999
 
     def add_row(self, row):
-        self.rows.append(SplitDataSet.process_row(row))
+        row = self.process_row(row)
+        if not row is None:
+            self.rows.append(row)
 
-    @staticmethod
-    def process_row(row: Dict[str, str]) -> ROW:
-        return {row_name: try_parse_int(value)
-                for row_name, value in row.items()}
+    def process_row(self, row: Dict[str, str]) -> Optional[ROW]:
+        parsed = {row_name: try_parse_float(value)
+                  for row_name, value in row.items()}
+
+        for row_idx, row in enumerate(self.rows):
+            if len(self.rows) == 0:
+                break
+            for col in INPUT_ROWS:
+                if parsed[col] != row[col]:
+                    continue
+
+                if parsed[OUTPUT_COL] > row[OUTPUT_COL]:
+                    self.rows.pop(row_idx)
+                else:
+                    return None
+
+        return parsed
 
     def __str__(self):
         return str(self.rows)
@@ -65,4 +84,5 @@ if __name__ == "__main__":
             field_names = split.columns
             writer = csv.DictWriter(output_file, fieldnames=field_names)
             writer.writeheader()
-            writer.writerows(split.rows)
+            writer.writerows(
+                sorted(split.rows, key=lambda row: row[OUTPUT_COL]))
