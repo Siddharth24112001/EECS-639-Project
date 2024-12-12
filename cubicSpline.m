@@ -19,10 +19,10 @@ n = length(Xin); % Length of the data
 A = zeros((n-1)*4); % Holds the system of equations
 b = zeros((n-1)*4,1); % Holds the y values
 
-% Populate A with P1(t), P2(t), ..., Pn-1(t)
+% Populate A with P_1(t), P_2(t), ..., P_n-1(t)
 for i=1:(n-1)
     P = [1 Xin(i) Xin(i).^2 Xin(i).^3
-         1 Xin(i+1) Xin(i+1).^2 Xin(i+1).^3]; % Pi(t)
+         1 Xin(i+1) Xin(i+1).^2 Xin(i+1).^3]; % P_i(t)
     A(i*2-1:i*2,i*4-3:i*4) = P;
 end
 
@@ -30,8 +30,8 @@ end
 off1 = (n-1)*2; % Offset for P'(t)
 off2 = off1 + (n-2); % Offset for P''(t)
 for i=1:(n-2)
-    P1 = [0 1 2*Xin(i+1) 3*Xin(i+1).^2]; % First derivative of Pi(t)
-    P2 = [0 0 2 6*Xin(i+1)]; % Second derivative of Pi(t)
+    P1 = [0 1 2*Xin(i+1) 3*Xin(i+1).^2]; % First derivative of P_i(t)
+    P2 = [0 0 2 6*Xin(i+1)]; % Second derivative of P_i(t)
     A(i+off1,i*4-3:i*4) = P1;
     A(i+off1,(i+1)*4-3:(i+1)*4) = -P1;
     A(i+off2,i*4-3:i*4) = P2;
@@ -62,7 +62,7 @@ elseif isequal(splineType, 'not-a-knot') % Not-a-Knot Cubic Spline
     A(splineCalcRow-1,8) = -1;
     A(splineCalcRow,(n-1)*4) = 1;
     A(splineCalcRow,(n-2)*4) = -1;
-else % Error
+else 
     error("splineType is not recognized!")
 end
 
@@ -78,7 +78,7 @@ coef = linsolve(A, b);
 step = fix(num / (n-1)); % Need an integer value,
 Xout = zeros((n-1) * step, 1);
 Yout = zeros((n-1) * step, 1);
-% Calculate values of Yout from pi(x)
+% Calculate values of Yout from p_i(x)
 for i=1:(n-1)
     x = linspace(Xin(i),Xin(i+1),step);
     y = coef(i*4-3) + coef(i*4-2)*x + coef(i*4-1)*(x.^2) + coef(i*4)*(x.^3);
