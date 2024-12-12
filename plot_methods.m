@@ -11,8 +11,7 @@ function plot_methods(x, y, eval_points, dataset_name)
     newton_vals = Newton_Interpolation([x, y], eval_points);
 
     % Evaluate Vandermonde interpolation
-    vandermonde_coeff = Vandermonde_Interpolation(x, y);
-    vandermonde_vals = polyval(vandermonde_coeff(end:-1:1), eval_points);
+    vandermonde_vals = Vandermonde_Interpolation([x, y], eval_points);
 
     % Plot original data and each spline method
     figure;
