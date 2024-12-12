@@ -6,32 +6,37 @@ function interpolated_vals = Vandermonde_Interpolation(data, eval_points)
 % OUTPUT:
 % - interpolated_vals: Interpolated values at eval_points
 
-    x = data(:,1);
-    y = data(:,2);
+x = data(:,1);
+y = data(:,2);
 
-    % Validate inputs
-    if length(x) ~= length(y)
-        error('x and y must have the same length.');
-    end
-    if size(unique(x), 1) ~= size(x, 1)
-        error('x is not a function; has more than one input with the same value')
-    end
-    
-    n = length(x); % Number of data points
-    
-    % Construct the Vandermonde matrix
-    V = zeros(n, n);
-    for i = 1:n
-        for j = 1:n
-            V(i, j) = x(i)^(j-1); % Column-wise powers of x
-        end
-    end
-    
-    % Solve the linear system V * coeff = y
-    coeff = V \ y(:); % Use backslash for numerical stability
-
-    interpolated_vals = polyval(coeff(end:-1:1), eval_points);    
+% Validate inputs
+if length(x) ~= length(y)
+    error('x and y must have the same length.');
+end
+if size(unique(x), 1) ~= size(x, 1)
+    error('x is not a function; has more than one input with the same value')
 end
 
+% Normalize the data points for numerical stability
+x_min = min(x);
+x_max = max(x);
+x_normalized = normalizePoints(x, x_min, x_max);
+eval_points_normalized = normalizePoints(eval_points, x_min, x_max);
 
+n = length(x); % Number of data points
 
+% Construct the Vandermonde matrix
+V = zeros(n, n);
+for i = 1:n
+    for j = 1:n
+        V(i, j) = x_normalized(i)^(j-1); % Column-wise powers of x
+    end
+end
+
+% Solve the linear system V * coeff = y
+% We use QR factorization to improve stability
+[Q, R] = qr(V);
+coeff = R \ (Q' * y(:));
+
+interpolated_vals = polyval(coeff(end:-1:1), eval_points_normalized);
+end

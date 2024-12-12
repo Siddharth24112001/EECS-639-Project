@@ -13,6 +13,6 @@ plot_methods(x2, y2, eval_points2, 'Dataset 2: f(x) = 1 / (1 + 12*x^2)');
 % Dataset 3: Year vs. Values
 x3 = [1994; 1995; 1996; 1997; 1998; 1999; 2000; 2001; 2002; 2003];
 y3 = [67.052; 68.008; 69.803; 72.024; 73.400; 72.063; 74.669; 74.487; 74.065; 76.777];
-eval_points3 = linspace(1994, 2003, 1000)';
+eval_points3 = linspace(min(x3), max(x3), 1000)';
 plot_methods(x3, y3, eval_points3, 'Dataset 3: Year vs. Values');
 
