@@ -1,3 +1,6 @@
+'''
+Script to preprocess and partition the data
+'''
 import os
 import csv
 
